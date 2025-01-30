@@ -20,9 +20,22 @@ $ cat > urls.txt
 https://jup.ag
 https://github.com/johnsnewby/load-tester-there-is-nothing-here
 https://github.com/johnsnewby/load-tester
-$ cat urls.txt | load-test -p 3
-{"average_request_duration":580,"longest_request_duration":1013,"shortest_request_duration":130,"status_codes":{"200":1,"404":0},"test_duration":1991,"total_downloaded":832292,"total_requests":3}
+$ cat urls.txt | ./target/debug/load-test -p 3 | jq .
+{
+  "average_request_duration": 353,
+  "longest_request_duration": 608,
+  "shortest_request_duration": 109,
+  "status_codes": {
+    "200": 1,
+    "404": 0
+  },
+  "test_duration": 758,
+  "total_downloaded": 836350,
+  "total_requests": 3
+}
 ```
+
+All times are in milliseconds.
 
 ## Bugs
 
