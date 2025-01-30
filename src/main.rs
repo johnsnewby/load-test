@@ -1,13 +1,10 @@
-use anyhow::Result;
 use clap::Parser;
 use fetcher::{FetchReceiverState, FetchResult, FetchResultReceiver};
 use futures::lock::Mutex;
-use serde::Serialize;
 use serde_json::json;
 use std::{
     io::{self, BufRead},
     sync::Arc,
-    time::{Duration, Instant},
 };
 use url_receiver::UrlReceiver;
 
