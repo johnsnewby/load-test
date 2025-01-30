@@ -77,8 +77,15 @@ async fn main() {
     log::debug!("Awaiting fetch results handle {fetch_results_handle:?}");
     drop(url_receiver);
     let fetch_result = fetch_results_handle.await.unwrap().unwrap();
-    println!(
-        "{}",
-        json!(crate::fetcher::summary(&fetch_result.state.lock().await.to_owned()).unwrap())
-    );
+    let summary = crate::fetcher::summary(&fetch_result.state.lock().await.to_owned()).unwrap();
+    log::debug!("Summary: {summary:?}");
+    if summary.valid_requests > 0 {
+        println!("{}", json!(summary));
+    } else {
+        // json! macro panics on 0 valid requests. Who knows why?
+        println!(
+            "{}",
+            json!({ "invalid_requests": summary.invalid_requests, "valid_requests": 0})
+        );
+    }
 }
