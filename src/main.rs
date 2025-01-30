@@ -1,10 +1,11 @@
 use anyhow::Result;
 use clap::Parser;
+use futures::lock::Mutex;
 use serde::Serialize;
 use serde_json::json;
 use std::{
     io::{self, BufRead},
-    //sync::{Arc, Mutex},
+    sync::Arc,
     time::{Duration, Instant},
 };
 
@@ -56,28 +57,34 @@ struct FetchResult {
     pub size: usize,
 }
 
-struct FetchResultReceiver {
-    receiver: async_channel::Receiver<FetchResult>,
+#[derive(Clone, Debug)]
+struct FetchReceiverState {
     results: Vec<FetchResult>,
     start: Option<Instant>,
     end: Option<Instant>,
 }
 
+#[derive(Clone, Debug)]
+struct FetchResultReceiver {
+    receiver: async_channel::Receiver<FetchResult>,
+    state: Arc<Mutex<FetchReceiverState>>,
+}
+
 impl FetchResultReceiver {
-    pub fn start(&mut self) -> () {
-        self.start = Some(Instant::now());
+    pub async fn start(&mut self) {
+        self.state.lock().await.start = Some(Instant::now());
     }
 
-    pub fn end(&mut self) -> () {
-        self.end = Some(Instant::now());
+    pub async fn end(&mut self) {
+        self.state.lock().await.end = Some(Instant::now());
     }
 
-    pub async fn rcv(&mut self) -> Result<Vec<FetchResult>> {
+    pub async fn rcv(&mut self) -> Result<Self> {
         loop {
             match self.receiver.recv().await {
                 Ok(result) => {
                     log::info!("{}", json!(result));
-                    self.results.push(result);
+                    self.state.lock().await.results.push(result);
                 }
                 Err(e) => {
                     log::info!("{e:?}");
@@ -85,7 +92,7 @@ impl FetchResultReceiver {
                 }
             }
         }
-        Ok(self.results.clone()) // get rid of this clone.
+        Ok(self.clone())
     }
 }
 
@@ -100,14 +107,17 @@ async fn main() {
 
     let mut fetch_result_receiver = FetchResultReceiver {
         receiver: result_receiver,
-        results: vec![],
-        start: None,
-        end: None,
+        state: Arc::new(Mutex::new(FetchReceiverState {
+            results: vec![],
+            start: None,
+            end: None,
+        })),
     };
 
     let (url_sender, url_receiver) = async_channel::unbounded::<String>();
 
-    let fetch_results_handle = tokio::spawn(async move { fetch_result_receiver.rcv().await });
+    let mut fetch_result_receiver2 = fetch_result_receiver.clone();
+    let fetch_results_handle = tokio::spawn(async move { fetch_result_receiver2.rcv().await });
 
     let url_receiver = UrlReceiver {
         receiver: url_receiver,
@@ -121,6 +131,7 @@ async fn main() {
         url_receivers.spawn(async move { url_receiver.rcv().await });
     }
 
+    fetch_result_receiver.start();
     for line in stdin.lock().lines() {
         let line = line.unwrap();
         log::debug!("Sending URL {line}");
@@ -137,7 +148,7 @@ async fn main() {
         url_results.push(url_receiver.unwrap());
     }
 
-    let after = Instant::now();
+    fetch_result_receiver.end();
 
     log::debug!("Awaiting fetch results handle {fetch_results_handle:?}");
     drop(url_receiver);
