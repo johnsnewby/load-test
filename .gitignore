@@ -1,0 +1,8 @@
+target
+.DS_Store
+.idea
+!idl.json
+global_snapshot
+.env
+node_modules
+.aider*
