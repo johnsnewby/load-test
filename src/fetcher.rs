@@ -38,10 +38,10 @@ pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
 
     for result in &state.results {
         if !result.valid {
-            invalid_requests = invalid_requests + 1;
+            invalid_requests += 1;
             continue;
         } else {
-            valid_requests = valid_requests + 1;
+            valid_requests += 1;
         }
         let duration = result.duration.as_millis();
         total_durations += duration;

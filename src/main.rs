@@ -77,6 +77,7 @@ async fn main() {
     log::debug!("Awaiting fetch results handle {fetch_results_handle:?}");
     drop(url_receiver);
     let fetch_result = fetch_results_handle.await.unwrap().unwrap();
+    #[allow(clippy::unnecessary_to_owned)] // it *is* necessary!
     let summary = crate::fetcher::summary(&fetch_result.state.lock().await.to_owned()).unwrap();
     log::debug!("Summary: {summary:?}");
     if summary.valid_requests > 0 {

@@ -2,11 +2,13 @@
 
 ## Summary
 
-This is a tiny load tester which simply reads a list of URLs from standard in, and executes them with some degree of parallelism, then reports back on shortest, longest and average request times, distribution of response status codes, total time taken and total downloaded. It outputs a JSON structure so that you can use it with jq in a command pipeline. It is intended that it be used in conjunction with other unix command line tools. 
+This is a tiny load tester which simply reads a list of URLs from standard in, and executes them with some degree of parallelism, then reports back on shortest, longest and average request times, distribution of response status codes, total time taken and total downloaded. It outputs a JSON structure so that you can use it with jq in a command pipeline. It is intended that it be used in conjunction with other unix command line tools, and kubernetes (see section below).
 
 ## Building
 
 `cargo build --release` (or debug if you want)
+`cargo build --release --target=x86_64-unknown-linux-musl` for the most portable x86_64 binary
+
 
 ## Arguments
 
@@ -39,17 +41,15 @@ All times are in milliseconds.
 
 ## Kubernetes Usage
 
-To use load-test with k8s on k8s, first build a binary which will work on your target system. For x86 systems the target `86_64-unknown-linux-musl` may help reduce any libc dependencies. To compile on Ubuntu for an x88 target:
+To use load-test an applicatiopn on a k8s pod, from that pod, first build a binary which will work on your target system. For x86 systems the target `86_64-unknown-linux-musl` may help reduce any libc dependencies. To compile on Ubuntu for an x88 target:
 
 ```
 $ sudo apt install musl-dev musl-tools
 $ cargo build --release --target=x86_64-unknown-linux-musl
-$ k9s
-$ kubectl -n mts get pods
-$ kubectl cp target/x86_64-unknown-linux-musl/release/load-test $PODNAME:/tmp/load-test
+$ kubectl cp target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
 $ kubectl cp -n $NAMESPACE  target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
 $ kubectl -n$NAMESPACE exec $POD -i -- /tmp/load-test
-$ cat urls.txt | kubectl -n mts exec rs-api-77cdc687f-znb4r -i -- /tmp/load-test -p 20 | jq .
+$ cat urls.txt | kubectl -n $NAMESPACE exec $POD -i -- /tmp/load-test -p 20 | jq .
 {
   "average_request_duration": 261,
   "invalid_requests": 0,
