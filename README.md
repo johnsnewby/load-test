@@ -50,7 +50,7 @@ $ sudo apt install musl-dev musl-tools
 $ cargo build --release --target=x86_64-unknown-linux-musl
 $ kubectl cp target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
 $ kubectl cp -n $NAMESPACE  target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
-$ kubectl -n$NAMESPACE exec $POD -i -- /tmp/load-test
+$ kubectl -n $NAMESPACE exec $POD -i -- /tmp/load-test
 $ cat urls.txt | kubectl -n $NAMESPACE exec $POD -i -- /tmp/load-test -p 20 | jq .
 {
   "average_request_duration": 261,
