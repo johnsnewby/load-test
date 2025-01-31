@@ -24,17 +24,19 @@ https://github.com/johnsnewby/load-tester-there-is-nothing-here
 https://github.com/johnsnewby/load-tester
 $ cat urls.txt | ./target/debug/load-test -p 3 | jq .
 {
-  "average_request_duration": 353,
-  "longest_request_duration": 608,
-  "shortest_request_duration": 109,
+  "average_request_duration": 487,
+  "invalid_requests": 0,
+  "longest_request_duration": 821,
+  "shortest_request_duration": 266,
   "status_codes": {
-    "200": 1,
-    "404": 0
+    "200": 2,
+    "404": 1
   },
-  "test_duration": 758,
-  "total_downloaded": 836350,
-  "total_requests": 3
+  "test_duration": 984,
+  "total_downloaded": 848074,
+  "valid_requests": 3
 }
+
 ```
 
 All times are in milliseconds.
