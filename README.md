@@ -6,8 +6,8 @@ This is a tiny load tester which simply reads a list of URLs from standard in, a
 
 ## Building
 
-`cargo build --release` (or debug if you want)
-`cargo build --release --target=x86_64-unknown-linux-musl` for the most portable x86_64 binary
+- `cargo build --release` (or debug if you want)
+- `cargo build --release --target=x86_64-unknown-linux-musl` for the most portable x86_64 binary
 
 
 ## Arguments
