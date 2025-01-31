@@ -24,16 +24,16 @@ https://github.com/johnsnewby/load-tester-there-is-nothing-here
 https://github.com/johnsnewby/load-tester
 $ cat urls.txt | ./target/debug/load-test -p 3 | jq .
 {
-  "average_request_duration": 487,
+  "average_request_duration_ms": 487,
   "invalid_requests": 0,
-  "longest_request_duration": 821,
-  "shortest_request_duration": 266,
+  "longest_request_duration_ms": 821,
+  "shortest_request_duration_ms": 266,
   "status_codes": {
     "200": 2,
     "404": 1
   },
-  "test_duration": 984,
-  "total_downloaded": 848074,
+  "test_duration_ms": 984,
+  "total_downloaded_bytes": 848074,
   "valid_requests": 3
 }
 
@@ -51,15 +51,15 @@ $ cargo build --release --target=x86_64-unknown-linux-musl
 $ kubectl cp -n $NAMESPACE  target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
 $ cat urls.txt | kubectl -n $NAMESPACE exec $POD -i -- /tmp/load-test -p 20 | jq .
 {
-  "average_request_duration": 261,
+  "average_request_duration_ms": 193,
   "invalid_requests": 0,
-  "longest_request_duration": 701,
-  "shortest_request_duration": 24,
+  "longest_request_duration_ms": 736,
+  "shortest_request_duration_ms": 13,
   "status_codes": {
     "200": 498
   },
-  "test_duration": 6770,
-  "total_downloaded": 893910,
+  "test_duration_ms": 4967,
+  "total_downloaded_bytes": 893412,
   "valid_requests": 498
 }
 ```
