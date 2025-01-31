@@ -5,4 +5,4 @@ target
 global_snapshot
 .env
 node_modules
-.aider*
+.aider*urls.txt

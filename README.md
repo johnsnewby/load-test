@@ -37,6 +37,33 @@ $ cat urls.txt | ./target/debug/load-test -p 3 | jq .
 
 All times are in milliseconds.
 
+## Kubernetes Usage
+
+To use load-test with k8s on k8s, first build a binary which will work on your target system. For x86 systems the target `86_64-unknown-linux-musl` may help reduce any libc dependencies. To compile on Ubuntu for an x88 target:
+
+```
+$ sudo apt install musl-dev musl-tools
+$ cargo build --release --target=x86_64-unknown-linux-musl
+$ k9s
+$ kubectl -n mts get pods
+$ kubectl cp target/x86_64-unknown-linux-musl/release/load-test $PODNAME:/tmp/load-test
+$ kubectl cp -n $NAMESPACE  target/x86_64-unknown-linux-musl/release/load-test $POD:/tmp/load-test
+$ kubectl -n$NAMESPACE exec $POD -i -- /tmp/load-test
+$ cat urls.txt | kubectl -n mts exec rs-api-77cdc687f-znb4r -i -- /tmp/load-test -p 20 | jq .
+{
+  "average_request_duration": 261,
+  "invalid_requests": 0,
+  "longest_request_duration": 701,
+  "shortest_request_duration": 24,
+  "status_codes": {
+    "200": 498
+  },
+  "test_duration": 6770,
+  "total_downloaded": 893910,
+  "valid_requests": 498
+}
+```
+
 ## Bugs
 
 None known but surely there are some.
