@@ -2,7 +2,7 @@
 
 ## Summary
 
-This is a tiny load tester which simply reads a list of URLs from standard in, and executes them with some degree of parallelism, then reports back on shortest, longest and average request times, distribution of response status codes, total time taken and total downloaded. It outputs a JSON structure so that you can use it with jq in a command pipeline. It is intended that it be used in conjunction with other unix command line tools, and kubernetes (see section below).
+This is a tiny load tester which simply reads a list of URLs from standard in, and executes them with some degree of consurrency, then reports back on shortest, longest and average request times, distribution of response status codes, total time taken and total downloaded. It outputs a JSON structure so that you can use it with jq in a command pipeline. It is intended that it be used in conjunction with other unix command line tools, and kubernetes (see section below).
 
 ## Building
 
