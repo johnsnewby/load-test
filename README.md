@@ -43,7 +43,7 @@ All times are in milliseconds.
 
 ## Kubernetes Usage
 
-To use load-test an applicatiopn on a k8s pod, from that pod, first build a binary which will work on your target system. For x86 systems the target `86_64-unknown-linux-musl` may help reduce any libc dependencies. To compile on Ubuntu for an x88 target:
+To use load-test an application on a k8s pod, from that pod, first build a binary which will work on your target system. For x86 systems the target `86_64-unknown-linux-musl` may help reduce any libc dependencies. To compile on Ubuntu for an x88 target:
 
 ```
 $ sudo apt install musl-dev musl-tools
