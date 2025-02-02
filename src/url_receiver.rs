@@ -11,9 +11,10 @@ pub struct UrlReceiver {
 
 impl UrlReceiver {
     pub async fn rcv(self) -> Result<()> {
+        let client = reqwest::Client::new();
         while let Ok(url) = self.receiver.recv().await {
             let before = Instant::now();
-            let result = match reqwest::Client::new().get(url).send().await {
+            let result = match client.get(url).send().await {
                 Ok(client) => {
                     let after = Instant::now();
                     let status_code = client.status().as_u16();

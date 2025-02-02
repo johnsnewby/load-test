@@ -17,22 +17,23 @@ pub struct FetchResult {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct RunSummary {
-    pub test_duration: u128,
-    pub valid_requests: u128,
+    pub average_request_duration_ms: u128,
     pub invalid_requests: u128,
-    pub average_request_duration: u128,
-    pub shortest_request_duration: u128,
-    pub longest_request_duration: u128,
-    pub total_downloaded: usize,
+    pub longest_request_duration_ms: u128,
+    pub requests_per_second: u128,
+    pub shortest_request_duration_ms: u128,
     pub status_codes: HashMap<u16, u128>,
+    pub test_duration_ms: u128,
+    pub total_downloaded_bytes: usize,
+    pub valid_requests: u128,
 }
 
 pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
     let mut total_durations = 0u128;
     let mut status_codes: HashMap<u16, u128> = HashMap::new();
-    let mut shortest_request_duration = u128::MAX;
-    let mut longest_request_duration = 0u128;
-    let mut total_downloaded = 0usize;
+    let mut shortest_request_duration_ms = u128::MAX;
+    let mut longest_request_duration_ms = 0u128;
+    let mut total_downloaded_bytes = 0usize;
     let mut valid_requests = 0;
     let mut invalid_requests = 0;
 
@@ -45,9 +46,9 @@ pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
         }
         let duration = result.duration.as_millis();
         total_durations += duration;
-        total_downloaded += result.size;
-        shortest_request_duration = std::cmp::min(shortest_request_duration, duration);
-        longest_request_duration = std::cmp::max(longest_request_duration, duration);
+        total_downloaded_bytes += result.size;
+        shortest_request_duration_ms = std::cmp::min(shortest_request_duration_ms, duration);
+        longest_request_duration_ms = std::cmp::max(longest_request_duration_ms, duration);
         status_codes.insert(
             result.status_code,
             match status_codes.get(&result.status_code) {
@@ -56,23 +57,26 @@ pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
             },
         );
     }
+    let test_duration_ms = state
+        .end
+        .unwrap()
+        .duration_since(state.start.unwrap())
+        .as_millis();
     log::debug!("Valid requests: {valid_requests}");
     let summary = RunSummary {
-        test_duration: state
-            .end
-            .unwrap()
-            .duration_since(state.start.unwrap())
-            .as_millis(),
+        test_duration_ms,
         valid_requests,
         invalid_requests,
-        average_request_duration: if valid_requests == 0 {
+        average_request_duration_ms: if valid_requests == 0 {
             0
         } else {
             (total_durations as f64 / valid_requests as f64) as u128
         },
-        shortest_request_duration,
-        longest_request_duration,
-        total_downloaded,
+        requests_per_second: (1000f64 * (test_duration_ms as f64) / (valid_requests as f64))
+            as u128,
+        shortest_request_duration_ms,
+        longest_request_duration_ms,
+        total_downloaded_bytes,
         status_codes,
     };
 
