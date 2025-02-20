@@ -4,6 +4,6 @@ mints = 'So11111111111111111111111111111111111111112', 'EPjFWdd5AufqSSqeM2qN1xzy
 
 100000.times do
   count = rand(1..50)
-  args = mints.sample(count).join('&')
+  args = mints.sample(count).join(',')
   puts("http://localhost:3030/tokens/v1/tokens/#{args}")
 end
