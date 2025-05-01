@@ -17,22 +17,22 @@ pub struct FetchResult {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct RunSummary {
-    pub average_request_duration_ms: u128,
+    pub average_request_duration_ms: f64,
     pub invalid_requests: u128,
-    pub longest_request_duration_ms: u128,
-    pub requests_per_second: u128,
-    pub shortest_request_duration_ms: u128,
+    pub longest_request_duration_ms: f64,
+    pub requests_per_second: f64,
+    pub shortest_request_duration_ms: f64,
     pub status_codes: HashMap<u16, u128>,
-    pub test_duration_ms: u128,
+    pub test_duration_ms: f64,
     pub total_downloaded_bytes: usize,
     pub valid_requests: u128,
 }
 
 pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
-    let mut total_durations = 0u128;
+    let mut total_durations = 0f64;
     let mut status_codes: HashMap<u16, u128> = HashMap::new();
-    let mut shortest_request_duration_ms = u128::MAX;
-    let mut longest_request_duration_ms = 0u128;
+    let mut shortest_request_duration_ms = f64::MAX;
+    let mut longest_request_duration_ms = 0f64;
     let mut total_downloaded_bytes = 0usize;
     let mut valid_requests = 0;
     let mut invalid_requests = 0;
@@ -44,11 +44,11 @@ pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
         } else {
             valid_requests += 1;
         }
-        let duration = result.duration.as_millis();
+        let duration = result.duration.as_millis() as f64;
         total_durations += duration;
         total_downloaded_bytes += result.size;
-        shortest_request_duration_ms = std::cmp::min(shortest_request_duration_ms, duration);
-        longest_request_duration_ms = std::cmp::max(longest_request_duration_ms, duration);
+        shortest_request_duration_ms = f64::min(shortest_request_duration_ms, duration);
+        longest_request_duration_ms = f64::max(longest_request_duration_ms, duration);
         status_codes.insert(
             result.status_code,
             match status_codes.get(&result.status_code) {
@@ -57,23 +57,24 @@ pub fn summary(state: &FetchReceiverState) -> Result<RunSummary> {
             },
         );
     }
-    let test_duration_ms = state
+
+    let test_duration_ms: f64 = state
         .end
         .unwrap()
         .duration_since(state.start.unwrap())
-        .as_millis();
+        .as_millis() as f64;
     log::debug!("Valid requests: {valid_requests}");
+
     let summary = RunSummary {
         test_duration_ms,
         valid_requests,
         invalid_requests,
         average_request_duration_ms: if valid_requests == 0 {
-            0
+            0f64
         } else {
-            (total_durations as f64 / valid_requests as f64) as u128
+            total_durations as f64 / valid_requests as f64
         },
-        requests_per_second: (1000f64 * (test_duration_ms as f64) / (valid_requests as f64))
-            as u128,
+        requests_per_second: 1000f64 * (test_duration_ms as f64) / (valid_requests as f64),
         shortest_request_duration_ms,
         longest_request_duration_ms,
         total_downloaded_bytes,
